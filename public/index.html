@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e40af">
+  <title>Cleaning Dashboard — 2026 Convention</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="dash-header">
+    <h1>🧹 2026 Convention — Cleaning Dashboard</h1>
+    <div class="dash-meta">Plant City Assembly Hall &nbsp;|&nbsp; June 12–14, 2026</div>
+    <div class="dash-contact">Overseer: Clifton Davis &nbsp;·&nbsp; 727-278-7454</div>
+  </header>
+
+  <!-- Team strip -->
+  <div class="overseer-strip">
+    <div class="overseer-person"><strong>Pierson Mims</strong> · 727-439-4490 · Zones 1, 2 &amp; 8 (Asgn A &amp; B)</div>
+    <div class="overseer-person"><strong>Harold Taylor</strong> · 727-808-8547 · Zones 4, 5 &amp; 6 (Asgn C, D &amp; E)</div>
+    <div class="overseer-person"><strong>Matt Harris</strong> · 407-462-2629 · Zones 3 &amp; 7</div>
+  </div>
+
+  <div class="dash-body">
+    <div id="dashContent">
+      <div class="center-page">
+        <div style="font-size:2rem">⏳</div>
+        <h2>Loading…</h2>
+      </div>
+    </div>
+    <div class="refresh-footer" id="refreshFooter"></div>
+  </div>
+
+<script>
+(function () {
+  const DAYS = [
+    { key: 'fri', label: 'Friday, June 12', codes: ['fri-a','fri-b','fri-c','fri-d','fri-e'] },
+    { key: 'sat', label: 'Saturday, June 13', codes: ['sat-a','sat-b','sat-c','sat-d','sat-e'] },
+    { key: 'sun', label: 'Sunday, June 14 ★ End-of-Convention Cleanup', codes: ['sun-a','sun-b','sun-c','sun-d','sun-e'], isSunday: true }
+  ];
+
+  function copyLink(code) {
+    const url = `${location.origin}/checklist.html?code=${code}`;
+    navigator.clipboard.writeText(url).then(() => {
+      const el = document.getElementById('copy-' + code);
+      if (el) { el.textContent = '✓ Copied!'; setTimeout(() => { el.textContent = 'Copy link'; }, 1800); }
+    });
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York'
+    });
+  }
+
+  function renderDashboard(status) {
+    const container = document.getElementById('dashContent');
+    container.innerHTML = '';
+
+    DAYS.forEach(day => {
+      const block = document.createElement('div');
+      block.className = 'day-block';
+
+      const heading = document.createElement('div');
+      heading.className = 'day-heading';
+      heading.innerHTML = day.label + (day.isSunday ? ' <span class="day-sunday-tag">MAJOR CLEANUP</span>' : '');
+      block.appendChild(heading);
+
+      const grid = document.createElement('div');
+      grid.className = 'cards-grid';
+
+      day.codes.forEach(code => {
+        const d = status[code];
+        if (!d) return;
+
+        let cardClass = 'asgn-card';
+        let chipClass = 'chip-none';
+        let chipLabel = 'Not Started';
+
+        if (d.completed) {
+          cardClass += ' complete';
+          chipClass = 'chip-done';
+          chipLabel = '✓ Complete';
+        } else if (d.inProgress) {
+          cardClass += ' in-progress';
+          chipClass = 'chip-progress';
+          chipLabel = 'In Progress';
+        }
+
+        const progressText = d.completed
+          ? `All ${d.totalTasks} tasks done`
+          : `${d.checkedCount} / ${d.totalTasks} tasks`;
+
+        const captainLine = d.captain
+          ? `<div class="card-captain">Capt: ${d.captain}</div>`
+          : `<div class="card-captain" style="color:#9ca3af">Captain: TBD</div>`;
+
+        const completedLine = d.completed && d.completedBy
+          ? `<div class="card-completed-by">✓ ${d.completedBy}${d.completedAt ? ' · ' + formatTime(d.completedAt) : ''}</div>`
+          : '';
+
+        const card = document.createElement('div');
+        card.className = cardClass;
+        card.innerHTML = `
+          <div class="card-letter">${d.assignment}</div>
+          <div class="card-congregation">${d.congregation}</div>
+          <div class="card-area">${d.area}</div>
+          <span class="card-status-chip ${chipClass}">${chipLabel}</span>
+          <div class="card-progress-text">${progressText}</div>
+          ${captainLine}
+          ${completedLine}
+          <a class="card-link" href="/checklist.html?code=${code}" target="_blank">Open checklist ↗</a>
+          <a class="card-link" href="#" id="copy-${code}" onclick="event.preventDefault(); copyLink('${code}')">Copy link</a>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      block.appendChild(grid);
+      container.appendChild(block);
+    });
+
+    // Overall summary
+    const all = Object.values(status);
+    const total = all.length;
+    const done = all.filter(d => d.completed).length;
+    const inProg = all.filter(d => d.inProgress).length;
+
+    const summary = document.createElement('div');
+    summary.style.cssText = 'background:#fff;border-radius:12px;padding:1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:1.5rem;';
+    summary.innerHTML = `
+      <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:.5rem">Overall Progress</div>
+      <div style="font-size:1.5rem;font-weight:800;color:#15803d">${done} <span style="color:#9ca3af;font-size:1rem;font-weight:600">/ ${total} complete</span></div>
+      ${inProg > 0 ? `<div style="font-size:.8rem;color:#b45309;margin-top:.25rem">${inProg} in progress</div>` : ''}
+    `;
+    container.insertBefore(summary, container.firstChild);
+  }
+
+  function load() {
+    fetch('/api/status')
+      .then(r => r.json())
+      .then(status => {
+        renderDashboard(status);
+        const footer = document.getElementById('refreshFooter');
+        footer.textContent = `Last updated: ${new Date().toLocaleTimeString()} · Auto-refreshes every 30 seconds`;
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('dashContent').innerHTML =
+          '<div class="center-page"><h2>Error loading data</h2><p>Check your connection and refresh.</p></div>';
+      });
+  }
+
+  // Make copyLink global
+  window.copyLink = copyLink;
+
+  load();
+  setInterval(load, 30000);
+})();
+</script>
+</body>
+</html>

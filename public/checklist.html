@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#1e40af">
+  <title>Cleaning Checklist — 2026 Convention</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header (rendered by JS) -->
+  <header class="page-header" id="pageHeader" style="display:none">
+    <div class="header-label">2026 Regional Convention — Cleaning Dept.</div>
+    <div class="header-congregation" id="hCongregation"></div>
+    <div class="header-meta" id="hMeta"></div>
+    <div class="header-badges" id="hBadges"></div>
+    <div class="progress-row">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-label" id="progressLabel">0 / 0</div>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="main-content" id="mainContent">
+    <div class="center-page" id="loadingState">
+      <div style="font-size:2rem">⏳</div>
+      <h2>Loading assignment…</h2>
+    </div>
+    <div id="errorState" class="center-page" style="display:none">
+      <div style="font-size:2.5rem">❌</div>
+      <h2>Assignment Not Found</h2>
+      <p>The code in the link is invalid. Please check the link and try again, or contact Clifton Davis (727-278-7454).</p>
+    </div>
+    <div id="contentArea" style="display:none"></div>
+  </main>
+
+  <!-- Sticky complete button -->
+  <div class="complete-bar" id="completeBar" style="display:none">
+    <button class="complete-btn" id="completeBtn">✓ Mark Assignment Complete</button>
+  </div>
+
+  <!-- Confirmation modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Mark Assignment Complete?</div>
+      <div class="modal-desc">This will notify Clifton Davis and your zone assistant overseer by text message.</div>
+      <div class="modal-warning" id="modalWarning"></div>
+      <label class="field-label" for="captainInput">Captain / Completed By</label>
+      <input class="field-input" type="text" id="captainInput" placeholder="Your name">
+      <div class="modal-btns">
+        <button class="btn-cancel" id="modalCancel">Cancel</button>
+        <button class="btn-confirm" id="modalConfirm">Confirm & Notify ✓</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  const params = new URLSearchParams(location.search);
+  const code = (params.get('code') || '').toLowerCase().trim();
+
+  if (!code) { showError(); return; }
+
+  let assignmentData = null;
+  let stateData = null;
+
+  // Load assignment + state from server
+  fetch(`/api/assignment/${code}`)
+    .then(r => { if (!r.ok) throw new Error('not found'); return r.json(); })
+    .then(({ assignment, state }) => {
+      assignmentData = assignment;
+      stateData = state;
+      render();
+    })
+    .catch(showError);
+
+  function render() {
+    const a = assignmentData;
+    const s = stateData;
+
+    // Build header
+    document.getElementById('hCongregation').textContent = a.congregation + ' Congregation';
+    document.getElementById('hMeta').textContent =
+      `Assignment ${a.assignment} · ${a.area} · Overseer: ${a.assistantOverseer}`;
+
+    const badgeEl = document.getElementById('hBadges');
+    badgeEl.innerHTML = `<span class="badge">${a.day}</span><span class="badge">Assignment ${a.assignment}</span>`;
+    if (a.isSunday) badgeEl.innerHTML += `<span class="badge badge-sunday">★ End-of-Convention Cleanup</span>`;
+
+    document.getElementById('pageHeader').style.display = '';
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('contentArea').style.display = '';
+
+    const content = document.getElementById('contentArea');
+    content.innerHTML = '';
+
+    // Completed banner
+    if (s.completed) {
+      const t = s.completedAt ? new Date(s.completedAt).toLocaleTimeString('en-US', {
+        hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York'
+      }) : '';
+      const banner = document.createElement('div');
+      banner.className = 'completed-banner';
+      banner.innerHTML = `
+        <span class="big-check">✅</span>
+        <h2>Assignment Complete!</h2>
+        <p><strong>${s.completedBy}</strong> marked this complete${t ? ' at ' + t + ' ET' : ''}.</p>
+        <p style="margin-top:.375rem;font-size:.75rem;color:#6b7280">Clifton Davis and ${a.assistantOverseer} have been notified.</p>
+      `;
+      content.appendChild(banner);
+    }
+
+    // Task sections
+    let taskIndex = 0;
+    const allTaskIds = [];
+
+    a.sections.forEach((sec, si) => {
+      const secEl = document.createElement('div');
+      secEl.className = 'task-section';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'section-title';
+      titleEl.textContent = sec.title;
+      secEl.appendChild(titleEl);
+
+      if (sec.note) {
+        const noteEl = document.createElement('div');
+        noteEl.className = 'section-note';
+        noteEl.textContent = sec.note;
+        secEl.appendChild(noteEl);
+      }
+
+      sec.tasks.forEach((task, ti) => {
+        const taskId = `${si}-${ti}`;
+        allTaskIds.push(taskId);
+        const checked = !!s.checkedTasks[taskId];
+
+        const item = document.createElement('div');
+        item.className = 'task-item' + (checked ? ' checked' : '');
+        item.dataset.taskId = taskId;
+
+        // Detect rag color
+        let ragDot = '';
+        if (/blue rag/i.test(task)) ragDot = '<span class="rag-dot rag-blue" title="Blue rag"></span>';
+        else if (/yellow rag/i.test(task)) ragDot = '<span class="rag-dot rag-yellow" title="Yellow rag"></span>';
+        else if (/red rag/i.test(task)) ragDot = '<span class="rag-dot rag-red" title="Red rag"></span>';
+
+        item.innerHTML = `
+          <label class="task-label">
+            <div class="cb-wrap">
+              <input type="checkbox" ${checked ? 'checked' : ''} ${s.completed ? 'disabled' : ''}>
+              <div class="cb-visual">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <span class="task-text">${escHtml(task)}${ragDot}</span>
+          </label>
+        `;
+
+        item.querySelector('input').addEventListener('change', function () {
+          if (s.completed) return;
+          const nowChecked = this.checked;
+          item.classList.toggle('checked', nowChecked);
+
+          fetch(`/api/assignment/${code}/task`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ taskId, checked: nowChecked })
+          }).catch(console.error);
+
+          if (nowChecked) s.checkedTasks[taskId] = true;
+          else delete s.checkedTasks[taskId];
+          updateProgress(allTaskIds);
+        });
+
+        secEl.appendChild(item);
+        taskIndex++;
+      });
+
+      content.appendChild(secEl);
+    });
+
+    // Reminders panel
+    const remPanel = document.createElement('div');
+    remPanel.className = 'reminders-panel';
+    remPanel.innerHTML = `
+      <button class="reminders-toggle">
+        📋 General Reminders
+        <span class="toggle-icon">▼</span>
+      </button>
+      <div class="reminders-list">
+        ${a.reminders.map(r => `<div class="reminder-item">${escHtml(r)}</div>`).join('')}
+      </div>
+    `;
+    remPanel.querySelector('.reminders-toggle').addEventListener('click', () => {
+      remPanel.classList.toggle('open');
+    });
+    content.appendChild(remPanel);
+
+    // Progress
+    updateProgress(allTaskIds);
+
+    // Complete button
+    if (!s.completed) {
+      const bar = document.getElementById('completeBar');
+      bar.style.display = '';
+      setupCompleteButton(allTaskIds);
+    } else {
+      document.getElementById('completeBar').style.display = 'none';
+    }
+  }
+
+  function updateProgress(allTaskIds) {
+    const total = allTaskIds.length;
+    const checked = allTaskIds.filter(id => !!stateData.checkedTasks[id]).length;
+    const pct = total ? Math.round((checked / total) * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = `${checked} / ${total}`;
+  }
+
+  function setupCompleteButton(allTaskIds) {
+    const btn = document.getElementById('completeBtn');
+    const modal = document.getElementById('modal');
+    const cancelBtn = document.getElementById('modalCancel');
+    const confirmBtn = document.getElementById('modalConfirm');
+    const warning = document.getElementById('modalWarning');
+    const input = document.getElementById('captainInput');
+
+    // Pre-fill captain name if known
+    if (assignmentData.captain) input.value = assignmentData.captain;
+
+    btn.addEventListener('click', () => {
+      const total = allTaskIds.length;
+      const checked = allTaskIds.filter(id => !!stateData.checkedTasks[id]).length;
+      const unchecked = total - checked;
+
+      if (unchecked > 0) {
+        warning.textContent = `⚠️ ${unchecked} task${unchecked > 1 ? 's are' : ' is'} not yet checked off. You can still submit, but please confirm all work is done.`;
+        warning.classList.add('show');
+      } else {
+        warning.classList.remove('show');
+      }
+
+      modal.classList.add('active');
+      input.focus();
+    });
+
+    cancelBtn.addEventListener('click', () => modal.classList.remove('active'));
+    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+
+    confirmBtn.addEventListener('click', async () => {
+      const captainName = input.value.trim() || assignmentData.captain || 'Captain';
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Sending…';
+
+      try {
+        const r = await fetch(`/api/assignment/${code}/complete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ completedBy: captainName })
+        });
+        if (!r.ok) throw new Error('Server error');
+
+        stateData.completed = true;
+        stateData.completedAt = new Date().toISOString();
+        stateData.completedBy = captainName;
+
+        modal.classList.remove('active');
+        render();
+      } catch (err) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Confirm & Notify ✓';
+        alert('Something went wrong. Please try again or contact Clifton Davis at 727-278-7454.');
+      }
+    });
+  }
+
+  function showError() {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'flex';
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+})();
+</script>
+</body>
+</html>
