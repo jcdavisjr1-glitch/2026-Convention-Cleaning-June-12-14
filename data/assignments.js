@@ -12,7 +12,7 @@ const SEC_A_MAIN = {
   title: 'Zone 2 South — Right Half of Main Auditorium',
   tasks: [
     'Wipe down all door handles, knobs, and light switches — yellow rags',
-    'Wipe down hard surfaces of all chairs (armrests, seat backs, tray surfaces) — yellow rags',
+    'Wipe down armrests on seats — yellow rags',
     'Vacuum carpet throughout the right half of the auditorium (row by row, front to back)',
     'Check for any items left under or between seats'
   ]
@@ -37,7 +37,7 @@ const SEC_B_MAIN = {
   title: 'Zone 2 North — Left Half of Main Auditorium',
   tasks: [
     'Wipe down all door handles, knobs, and light switches — yellow rags',
-    'Wipe down hard surfaces of all chairs (armrests, seat backs, tray surfaces) — yellow rags',
+    'Wipe down armrests on seats — yellow rags',
     'Vacuum carpet throughout the left half of the auditorium (row by row, front to back)',
     'Check for any items left under or between seats'
   ]
@@ -65,7 +65,7 @@ const SEC_C_WEST_AUD = {
   title: 'Zone 9 — West Auditorium',
   tasks: [
     'Wipe down all door handles, knobs, and light switches — yellow rags',
-    'Wipe down hard surfaces of all chairs — yellow rags',
+    'Wipe down armrests on seats — yellow rags',
     'Vacuum carpet throughout the West Auditorium',
     'Clean all glass surfaces — blue rags'
   ]
