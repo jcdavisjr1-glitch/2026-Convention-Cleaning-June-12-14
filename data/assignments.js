@@ -136,7 +136,7 @@ const ASSIGNMENTS = {
     captainPhone: '7274093933',
     area: 'Zone 2 South — Auditorium Right & Aud. Women\'s Restroom',
     assistantOverseer: 'Pierson Mims',
-    assistantPhone: '7274394490',
+    assistantPhone: '7274521651', // TEMP TEST — restore to 7274394490 after test
     sections: [SEC_A_MAIN, SEC_A_RESTROOM, SEC_FINAL],
     reminders: REMINDERS
   },
