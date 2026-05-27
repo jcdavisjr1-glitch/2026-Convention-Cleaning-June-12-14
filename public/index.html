@@ -113,6 +113,7 @@
           ${completedLine}
           <a class="card-link" href="/checklist.html?code=${code}" target="_blank">Open checklist ↗</a>
           <a class="card-link" href="#" id="copy-${code}" onclick="event.preventDefault(); copyLink('${code}')">Copy link</a>
+          ${(d.completed || d.inProgress) ? `<a class="card-link" style="color:#dc2626" href="#" onclick="event.preventDefault(); resetAssignment('${code}', '${d.congregation}')">↺ Reset</a>` : ''}
         `;
 
         grid.appendChild(card);
@@ -153,8 +154,17 @@
       });
   }
 
-  // Make copyLink global
+  function resetAssignment(code, congregation) {
+    if (!confirm(`Reset ${congregation}?\n\nThis will clear all checked tasks and the completion status. This cannot be undone.`)) return;
+    fetch(`/api/reset/${code}`, { method: 'POST' })
+      .then(r => r.json())
+      .then(() => load())
+      .catch(() => alert('Reset failed — please try again.'));
+  }
+
+  // Make functions global
   window.copyLink = copyLink;
+  window.resetAssignment = resetAssignment;
 
   load();
   setInterval(load, 30000);
