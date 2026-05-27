@@ -87,8 +87,8 @@ app.post('/api/assignment/:code/complete', async (req, res) => {
     const msg =
       `✅ CLEANING COMPLETE\n` +
       `${assignment.day} @ ${time} ET\n` +
-      `Assignment ${assignment.assignment}: ${assignment.congregation}\n` +
-      `Area: ${assignment.area}\n` +
+      `${assignment.congregation} Congregation\n` +
+      `${assignment.area}\n` +
       `Captain: ${state[code].completedBy}`;
 
     const twilio = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);

@@ -85,10 +85,10 @@
     // Build header
     document.getElementById('hCongregation').textContent = a.congregation + ' Congregation';
     document.getElementById('hMeta').textContent =
-      `Assignment ${a.assignment} · ${a.area} · Overseer: ${a.assistantOverseer}`;
+      `${a.area} · Overseer: ${a.assistantOverseer}`;
 
     const badgeEl = document.getElementById('hBadges');
-    badgeEl.innerHTML = `<span class="badge">${a.day}</span><span class="badge">Assignment ${a.assignment}</span>`;
+    badgeEl.innerHTML = `<span class="badge">${a.day}</span>`;
     if (a.isSunday) badgeEl.innerHTML += `<span class="badge badge-sunday">★ End-of-Convention Cleanup</span>`;
 
     document.getElementById('pageHeader').style.display = '';
