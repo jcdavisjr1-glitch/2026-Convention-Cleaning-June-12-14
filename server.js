@@ -112,6 +112,48 @@ app.post('/api/assignment/:code/complete', async (req, res) => {
     console.log('SMS not configured — skipping. Set TWILIO_* env vars to enable.');
   }
 
+  // Send email notifications if configured
+  const { EMAIL_FROM, EMAIL_PASSWORD, OVERSEER_EMAIL } = process.env;
+  if (EMAIL_FROM && EMAIL_PASSWORD && OVERSEER_EMAIL) {
+    const time = new Date().toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/New_York'
+    });
+    const subject = `✅ Cleaning Complete — ${assignment.congregation} (${assignment.day})`;
+    const body = `
+      <h2 style="color:#15803d">✅ Assignment Complete</h2>
+      <table style="font-family:sans-serif;font-size:15px;line-height:1.8">
+        <tr><td><strong>Day:</strong></td><td>${assignment.day} @ ${time} ET</td></tr>
+        <tr><td><strong>Congregation:</strong></td><td>${assignment.congregation}</td></tr>
+        <tr><td><strong>Area:</strong></td><td>${assignment.area}</td></tr>
+        <tr><td><strong>Captain:</strong></td><td>${state[code].completedBy}</td></tr>
+        <tr><td><strong>Zone Overseer:</strong></td><td>${assignment.assistantOverseer}</td></tr>
+      </table>
+    `;
+
+    try {
+      const nodemailer = require('nodemailer');
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user: EMAIL_FROM, pass: EMAIL_PASSWORD }
+      });
+
+      const emailRecipients = [OVERSEER_EMAIL];
+      if (process.env[`ASSISTANT_EMAIL_${assignment.assistantOverseer.split(' ')[1].toUpperCase()}`]) {
+        emailRecipients.push(process.env[`ASSISTANT_EMAIL_${assignment.assistantOverseer.split(' ')[1].toUpperCase()}`]);
+      }
+
+      await transporter.sendMail({
+        from: `"2026 Convention Cleaning" <${EMAIL_FROM}>`,
+        to: emailRecipients.join(', '),
+        subject,
+        html: body
+      });
+      console.log(`Email sent to: ${emailRecipients.join(', ')}`);
+    } catch (err) {
+      console.error('Email failed:', err.message);
+    }
+  }
+
   res.json({ success: true });
 });
 
@@ -155,6 +197,32 @@ app.post('/api/reset/:code', (req, res) => {
   delete state[code];
   saveState(state);
   res.json({ success: true });
+});
+
+// GET /api/email-test — send a test email to verify Gmail is working
+app.get('/api/email-test', async (req, res) => {
+  const { EMAIL_FROM, EMAIL_PASSWORD, OVERSEER_EMAIL } = process.env;
+  if (!EMAIL_FROM || !EMAIL_PASSWORD || !OVERSEER_EMAIL) {
+    return res.json({ success: false, error: 'Email env vars not set', vars: {
+      EMAIL_FROM: !!EMAIL_FROM, EMAIL_PASSWORD: !!EMAIL_PASSWORD, OVERSEER_EMAIL: !!OVERSEER_EMAIL
+    }});
+  }
+  try {
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: EMAIL_FROM, pass: EMAIL_PASSWORD }
+    });
+    await transporter.sendMail({
+      from: `"2026 Convention Cleaning" <${EMAIL_FROM}>`,
+      to: OVERSEER_EMAIL,
+      subject: '✅ Test — Convention Cleaning Tracker Email Working',
+      html: '<h2 style="color:#15803d">Email notifications are working!</h2><p>Your convention cleaning tracker is set up correctly.</p>'
+    });
+    res.json({ success: true, sentTo: OVERSEER_EMAIL });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
 });
 
 // GET /api/sms-test — send a test text to the overseer number to verify Twilio is working
