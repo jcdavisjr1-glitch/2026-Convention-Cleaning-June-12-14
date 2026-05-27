@@ -157,6 +157,33 @@ app.post('/api/reset/:code', (req, res) => {
   res.json({ success: true });
 });
 
+// GET /api/sms-test — send a test text to the overseer number to verify Twilio is working
+app.get('/api/sms-test', async (req, res) => {
+  const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER, OVERSEER_PHONE } = process.env;
+
+  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM_NUMBER) {
+    return res.json({ success: false, error: 'Twilio env vars not set', vars: {
+      TWILIO_ACCOUNT_SID: !!TWILIO_ACCOUNT_SID,
+      TWILIO_AUTH_TOKEN: !!TWILIO_AUTH_TOKEN,
+      TWILIO_FROM_NUMBER: !!TWILIO_FROM_NUMBER,
+      OVERSEER_PHONE: !!OVERSEER_PHONE
+    }});
+  }
+
+  try {
+    const twilio = require('twilio')(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+    const to = `+1${(OVERSEER_PHONE || '7272787454').replace(/\D/g, '')}`;
+    const message = await twilio.messages.create({
+      body: '✅ Test message from Convention Cleaning Tracker — Twilio is working!',
+      from: TWILIO_FROM_NUMBER,
+      to
+    });
+    res.json({ success: true, messageSid: message.sid, to });
+  } catch (err) {
+    res.json({ success: false, error: err.message, code: err.code });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Convention Cleaning Tracker running on port ${PORT}`);
   console.log(`Dashboard: http://localhost:${PORT}/`);
