@@ -22,6 +22,8 @@
     <div class="overseer-person"><strong>Matt Harris</strong> · 407-462-2629 · Zones 3 &amp; 8</div>
   </div>
 
+  <div id="roleBar"></div>
+
   <div class="dash-body">
     <div id="dashContent">
       <div class="center-page">
@@ -34,11 +36,41 @@
 
 <script>
 (function () {
+  // Role-based access: ?admin = Clifton (all + reset), ?view=pierson = A&B only, ?view=harold = C/D/E only
+  const params = new URLSearchParams(location.search);
+  const isAdmin = params.has('admin');
+  const view = params.get('view'); // 'pierson' or 'harold'
+
+  const ROLE_CODES = {
+    pierson: ['fri-a','sat-a','sun-a','fri-b','sat-b','sun-b'],
+    harold:  ['fri-c','sat-c','sun-c','fri-d','sat-d','sun-d','fri-e','sat-e','sun-e']
+  };
+
+  // Show role banner
+  (function() {
+    const bar = document.getElementById('roleBar');
+    if (!bar) return;
+    let label = '', color = '';
+    if (isAdmin) { label = '🔑 Admin View — Clifton Davis (All Zones + Reset)'; color = '#1e40af'; }
+    else if (view === 'pierson') { label = 'Pierson Mims — Zones 1, 2 & 7'; color = '#065f46'; }
+    else if (view === 'harold') { label = 'Harold Taylor — Zones 4, 5 & 6'; color = '#7c2d12'; }
+    if (label) {
+      bar.style.cssText = `background:${color};color:#fff;text-align:center;padding:.5rem 1rem;font-size:.875rem;font-weight:600;`;
+      bar.textContent = label;
+    }
+  })();
+
   const DAYS = [
     { key: 'fri', label: 'Friday, June 12', codes: ['fri-a','fri-b','fri-c','fri-d','fri-e'] },
     { key: 'sat', label: 'Saturday, June 13', codes: ['sat-a','sat-b','sat-c','sat-d','sat-e'] },
     { key: 'sun', label: 'Sunday, June 14 ★ End-of-Convention Cleanup', codes: ['sun-a','sun-b','sun-c','sun-d','sun-e'], isSunday: true }
   ];
+
+  function allowedCodes(dayCodes) {
+    if (isAdmin || !view) return dayCodes;
+    const allowed = ROLE_CODES[view] || [];
+    return dayCodes.filter(c => allowed.includes(c));
+  }
 
   function copyLink(code) {
     const url = `${location.origin}/checklist.html?code=${code}`;
@@ -71,7 +103,10 @@
       const grid = document.createElement('div');
       grid.className = 'cards-grid';
 
-      day.codes.forEach(code => {
+      const visibleCodes = allowedCodes(day.codes);
+      if (visibleCodes.length === 0) return;
+
+      visibleCodes.forEach(code => {
         const d = status[code];
         if (!d) return;
 
@@ -112,7 +147,7 @@
           ${completedLine}
           <a class="card-link" href="/checklist.html?code=${code}" target="_blank">Open checklist ↗</a>
           <a class="card-link" href="#" id="copy-${code}" onclick="event.preventDefault(); copyLink('${code}')">Copy link</a>
-          ${(d.completed || d.inProgress) ? `<a class="card-link" style="color:#dc2626" href="#" onclick="event.preventDefault(); resetAssignment('${code}', '${d.congregation}')">↺ Reset</a>` : ''}
+          ${isAdmin && (d.completed || d.inProgress) ? `<a class="card-link" style="color:#dc2626" href="#" onclick="event.preventDefault(); resetAssignment('${code}', '${d.congregation}')">↺ Reset</a>` : ''}
         `;
 
         grid.appendChild(card);
@@ -122,8 +157,11 @@
       container.appendChild(block);
     });
 
-    // Overall summary
-    const all = Object.values(status);
+    // Overall summary — scoped to visible assignments only
+    const visibleKeys = (isAdmin || !view)
+      ? Object.keys(status)
+      : (ROLE_CODES[view] || []);
+    const all = visibleKeys.map(k => status[k]).filter(Boolean);
     const total = all.length;
     const done = all.filter(d => d.completed).length;
     const inProg = all.filter(d => d.inProgress).length;
