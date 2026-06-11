@@ -136,6 +136,50 @@
       content.appendChild(supplyNote);
     }
 
+    // Zone 2 North
+    if (a.area && a.area.includes('Zone 2 North')) {
+      const supplyNote = document.createElement('div');
+      supplyNote.style.cssText = 'background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:.875rem 1rem;margin-bottom:1rem;';
+      supplyNote.innerHTML = `
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#1e40af;margin-bottom:.25rem">Supply Locations</div>
+        <div style="font-size:.9rem;color:#1e3a8a;line-height:1.5">Vacuums and supplies for the auditorium are at the cleaning desk. <strong>(Please only use appropriate day's supplies.)</strong></div>
+      `;
+      content.appendChild(supplyNote);
+    }
+
+    // Zones 6 & 9 — Dining Room & West Auditorium
+    if (a.area && a.area.includes('Zones 6 & 9')) {
+      const supplyNote = document.createElement('div');
+      supplyNote.style.cssText = 'background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:.875rem 1rem;margin-bottom:1rem;';
+      supplyNote.innerHTML = `
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#1e40af;margin-bottom:.25rem">Supply Locations</div>
+        <div style="font-size:.9rem;color:#1e3a8a;line-height:1.5">Vacuums and supplies for West Auditorium and Cafeteria are located down the hallway behind the West Auditorium stage. <strong>(Please only use appropriate day's supplies.)</strong></div>
+      `;
+      content.appendChild(supplyNote);
+    }
+
+    // Zones 3 & 5 — Lobbies, Hallways & Men's Restroom
+    if (a.area && a.area.includes('Zones 3 & 5')) {
+      const supplyNote = document.createElement('div');
+      supplyNote.style.cssText = 'background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:.875rem 1rem;margin-bottom:1rem;';
+      supplyNote.innerHTML = `
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#1e40af;margin-bottom:.25rem">Supply Locations</div>
+        <div style="font-size:.9rem;color:#1e3a8a;line-height:1.5">Supplies for Lobby &amp; Hallways are located at the cleaning desk. Men's restroom supplies are in the men's restroom closet. <strong>(Please only use appropriate day's supplies.)</strong></div>
+      `;
+      content.appendChild(supplyNote);
+    }
+
+    // Zone 4 — Main Women's Restroom
+    if (a.area && a.area.includes('Zone 4')) {
+      const supplyNote = document.createElement('div');
+      supplyNote.style.cssText = 'background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:.875rem 1rem;margin-bottom:1rem;';
+      supplyNote.innerHTML = `
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#1e40af;margin-bottom:.25rem">Supply Locations</div>
+        <div style="font-size:.9rem;color:#1e3a8a;line-height:1.5">Supplies for the Main Women's Restroom are in the janitor closet located in the Women's Restroom.</div>
+      `;
+      content.appendChild(supplyNote);
+    }
+
     // Task sections
     let taskIndex = 0;
     const allTaskIds = [];
