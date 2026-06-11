@@ -138,13 +138,68 @@
     container.insertBefore(summary, container.firstChild);
   }
 
+  // Track known completed assignments to detect new completions
+  let knownCompleted = new Set();
+  let firstLoad = true;
+
+  function playChime() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [523, 659, 784].forEach((freq, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = freq;
+        o.type = 'sine';
+        g.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
+        g.gain.linearRampToValueAtTime(0.35, ctx.currentTime + i * 0.18 + 0.05);
+        g.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.18 + 0.4);
+        o.start(ctx.currentTime + i * 0.18);
+        o.stop(ctx.currentTime + i * 0.18 + 0.5);
+      });
+    } catch(e) {}
+  }
+
+  function checkForNewCompletions(status) {
+    if (firstLoad) {
+      Object.values(status).forEach(d => { if (d.completed) knownCompleted.add(d.code); });
+      firstLoad = false;
+      return;
+    }
+    const newlyDone = Object.values(status).filter(d => d.completed && !knownCompleted.has(d.code));
+    if (newlyDone.length > 0) {
+      playChime();
+      newlyDone.forEach(d => {
+        knownCompleted.add(d.code);
+        // Flash the card
+        setTimeout(() => {
+          const cards = document.querySelectorAll('.asgn-card.complete');
+          cards.forEach(card => {
+            if (card.innerHTML.includes(d.congregation)) {
+              card.style.transition = 'background 0.3s';
+              card.style.background = '#bbf7d0';
+              setTimeout(() => card.style.background = '', 2000);
+            }
+          });
+        }, 100);
+      });
+      // Show a banner
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#15803d;color:#fff;text-align:center;padding:.875rem;font-weight:700;font-size:1rem;z-index:999;animation:slideDown .3s ease';
+      banner.textContent = `✅ ${newlyDone.map(d => d.congregation).join(', ')} — Assignment Complete!`;
+      document.body.appendChild(banner);
+      setTimeout(() => banner.remove(), 5000);
+    }
+  }
+
   function load() {
     fetch('/api/status')
       .then(r => r.json())
       .then(status => {
+        checkForNewCompletions(status);
         renderDashboard(status);
         const footer = document.getElementById('refreshFooter');
-        footer.textContent = `Last updated: ${new Date().toLocaleTimeString()} · Auto-refreshes every 30 seconds`;
+        footer.textContent = `Last updated: ${new Date().toLocaleTimeString()} · Auto-refreshes every 15 seconds`;
       })
       .catch(err => {
         console.error(err);
@@ -166,7 +221,7 @@
   window.resetAssignment = resetAssignment;
 
   load();
-  setInterval(load, 30000);
+  setInterval(load, 15000);
 })();
 </script>
 </body>

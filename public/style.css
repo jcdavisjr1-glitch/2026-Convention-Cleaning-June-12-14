@@ -565,6 +565,11 @@ body {
 
 .overseer-person strong { color: var(--white); }
 
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
 @media (min-width: 640px) {
   .cards-grid { grid-template-columns: repeat(5, 1fr); }
 }
