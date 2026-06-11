@@ -114,6 +114,17 @@
       content.appendChild(banner);
     }
 
+    // Maintenance reminder for Friday & Saturday
+    if (!a.isSunday) {
+      const reminder = document.createElement('div');
+      reminder.style.cssText = 'background:#fef9c3;border-left:4px solid #ca8a04;border-radius:8px;padding:.875rem 1rem;margin-bottom:1rem;';
+      reminder.innerHTML = `
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#92400e;margin-bottom:.25rem">Reminder</div>
+        <div style="font-size:.9rem;color:#78350f;line-height:1.5">Brothers of Friday &amp; Saturday — <strong>Maintenance Cleaning Only.</strong> Keep it neat and presentable for the next day. Deep cleaning is reserved for Sunday only.</div>
+      `;
+      content.appendChild(reminder);
+    }
+
     // Task sections
     let taskIndex = 0;
     const allTaskIds = [];
