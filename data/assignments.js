@@ -116,6 +116,13 @@ const SEC_E_WOMENS = {
   ]
 };
 
+const SEC_FINAL_WEEKDAY = {
+  title: 'Final Steps',
+  tasks: [
+    'Captain: please complete final walkthrough and verify all tasks are done'
+  ]
+};
+
 const SEC_FINAL = {
   title: 'Final Steps',
   tasks: [
@@ -137,7 +144,7 @@ const ASSIGNMENTS = {
     area: 'Zone 2 South — Auditorium Right & Aud. Women\'s Restroom',
     assistantOverseer: 'Pierson Mims',
     assistantPhone: '7274394490',
-    sections: [SEC_A_MAIN, SEC_A_RESTROOM, SEC_FINAL],
+    sections: [SEC_A_MAIN, SEC_A_RESTROOM, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'fri-b': {
@@ -152,7 +159,7 @@ const ASSIGNMENTS = {
     area: 'Zone 2 North — Auditorium Left',
     assistantOverseer: 'Pierson Mims',
     assistantPhone: '7274394490',
-    sections: [SEC_B_MAIN, SEC_FINAL],
+    sections: [SEC_B_MAIN, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'fri-c': {
@@ -167,7 +174,7 @@ const ASSIGNMENTS = {
     area: 'Dining Room & West Auditorium — Zones 6 & 9',
     assistantOverseer: 'Harold Taylor',
     assistantPhone: '7278088547',
-    sections: [makeSEC_C_DINING(false), SEC_C_WEST_AUD, SEC_FINAL],
+    sections: [makeSEC_C_DINING(false), SEC_C_WEST_AUD, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'fri-d': {
@@ -182,7 +189,7 @@ const ASSIGNMENTS = {
     area: 'Lobbies, Hallways & Men\'s Restroom — Zones 3 & 5',
     assistantOverseer: 'Harold Taylor',
     assistantPhone: '7278088547',
-    sections: [SEC_D_LOBBIES, SEC_D_MENS, SEC_FINAL],
+    sections: [SEC_D_LOBBIES, SEC_D_MENS, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'fri-e': {
@@ -197,7 +204,7 @@ const ASSIGNMENTS = {
     area: "Main Women's Restroom — Zone 4",
     assistantOverseer: 'Harold Taylor',
     assistantPhone: '7278088547',
-    sections: [SEC_E_WOMENS, SEC_FINAL],
+    sections: [SEC_E_WOMENS, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'sat-a': {
@@ -212,7 +219,7 @@ const ASSIGNMENTS = {
     area: 'Zone 2 South — Auditorium Right & Aud. Women\'s Restroom',
     assistantOverseer: 'Pierson Mims',
     assistantPhone: '7274394490',
-    sections: [SEC_A_MAIN, SEC_A_RESTROOM, SEC_FINAL],
+    sections: [SEC_A_MAIN, SEC_A_RESTROOM, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'sat-b': {
@@ -227,7 +234,7 @@ const ASSIGNMENTS = {
     area: 'Zone 2 North — Auditorium Left',
     assistantOverseer: 'Pierson Mims',
     assistantPhone: '7274394490',
-    sections: [SEC_B_MAIN, SEC_FINAL],
+    sections: [SEC_B_MAIN, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'sat-c': {
@@ -242,7 +249,7 @@ const ASSIGNMENTS = {
     area: 'Dining Room & West Auditorium — Zones 6 & 9',
     assistantOverseer: 'Harold Taylor',
     assistantPhone: '7278088547',
-    sections: [makeSEC_C_DINING(false), SEC_C_WEST_AUD, SEC_FINAL],
+    sections: [makeSEC_C_DINING(false), SEC_C_WEST_AUD, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'sat-d': {
@@ -257,7 +264,7 @@ const ASSIGNMENTS = {
     area: 'Lobbies, Hallways & Men\'s Restroom — Zones 3 & 5',
     assistantOverseer: 'Harold Taylor',
     assistantPhone: '7278088547',
-    sections: [SEC_D_LOBBIES, SEC_D_MENS, SEC_FINAL],
+    sections: [SEC_D_LOBBIES, SEC_D_MENS, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'sat-e': {
@@ -272,7 +279,7 @@ const ASSIGNMENTS = {
     area: "Main Women's Restroom — Zone 4",
     assistantOverseer: 'Harold Taylor',
     assistantPhone: '7278088547',
-    sections: [SEC_E_WOMENS, SEC_FINAL],
+    sections: [SEC_E_WOMENS, SEC_FINAL_WEEKDAY],
     reminders: REMINDERS
   },
   'sun-a': {
