@@ -170,7 +170,6 @@ app.get('/api/status', (req, res) => {
       code,
       day: assignment.day,
       dayShort: assignment.dayShort,
-      assignment: assignment.assignment,
       congregation: assignment.congregation,
       location: assignment.location,
       area: assignment.area,
